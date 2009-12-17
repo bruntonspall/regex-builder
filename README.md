@@ -19,9 +19,9 @@ API
 These can be imported from the library as functions, and chained as normal.
 They return a RegexBuilder object, so do to_string if you want to feed it into the re module
 
-  from regex_builder import *
-  regex = repeats(literal('a'),2,3).to_string()
-  assertEquals('a{2,3}', regex)
+    from regex_builder import *
+    regex = repeats(literal('a'),2,3).to_string()
+    assertEquals('a{2,3}', regex)
 
  * _literal_ returns a literal string to be used in the regex.  Be careful of backslash characters
  * _repeats_ takes another regex and either fixed number of repeats, or a minimum and maximum
