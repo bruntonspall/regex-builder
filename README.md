@@ -1,8 +1,6 @@
 Regex Builder
 =============
 
-(C) Michael Brunton-Spall (michael@brunton-spall.co.uk) 2009, Licensed under MIT License.
-
 A simple regex builder python interface, making describing complicated regular expressions slightly easier to understand
 
 Features
