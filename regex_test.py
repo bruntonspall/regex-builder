@@ -160,3 +160,15 @@ class ComplexTests(unittest.TestCase):
             .literal(r'\.')
             .repeats(literal(r'\d'), 1, 3)
             .to_string())
+
+class RealLifeTests(unittest.TestCase):
+    def test_section_keyword_urls(self):
+        """ We want to match /travel/france, /travel/france+skiing, /travel/france+science/nanotechnology """
+        slugword = one_or_more(range('a-zA-Z0-9'))
+        section_keyword = literal(str(slugword)+'/'+str(slugword))
+        combiner = literal('/'+str(section_keyword)).optional(literal('\\+').alternate(section_keyword, slugword))
+        regex = str(combiner)
+        print regex
+        self.assertNotEqual(None, re.match(regex, "/travel/france"))
+        self.assertNotEqual(None, re.match(regex, "/travel/france+skiing"))
+        self.assertNotEqual(None, re.match(regex, "/travel/france+science/nanotechnology"))
