@@ -2,6 +2,7 @@ Regex Builder
 =============
 
 A simple regex builder python interface, making describing complicated regular expressions slightly easier to understand
+Licensed under BSD License, see LICENSE.txt for details.
 
 Features
 --------
