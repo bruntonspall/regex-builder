@@ -33,6 +33,12 @@ class BuilderTests(unittest.TestCase):
     def test_character_inverted_range(self):
         self.assertEquals('[^abc]', RegexBuilder().inverted_range('abc').to_string())
     
+    def test_or(self):
+        self.assertEquals('a|b', RegexBuilder().alternate(literal('a'), literal('b')).to_string())
+        self.assertEquals('(?:ab)|b', RegexBuilder().alternate(literal('ab'), literal('b')).to_string())
+        self.assertEquals('a|(?:bc)', RegexBuilder().alternate(literal('a'), literal('bc')).to_string())
+        self.assertEquals('(?:ab)|(?:cd)', RegexBuilder().alternate(literal('ab'), literal('cd')).to_string())
+
     def test_module_functions(self):
         self.assertEquals('ab(c{3,7})d', literal('ab').group(repeats(literal('c'), 3, 7)).literal('d').to_string())
 

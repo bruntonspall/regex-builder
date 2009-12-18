@@ -79,6 +79,16 @@ class InvertedRangeNode(Node):
     def __len__(self):
         return 1
 
+class OrNode(Node):
+    def __str__(self):
+        if len(self.data['lhs']) > 1:
+            self.data['lhs'] = group(self.data['lhs'], non_capture=True)
+        if len(self.data['rhs']) > 1:
+            self.data['rhs'] = group(self.data['rhs'], non_capture=True)
+        return Node.__str__(self)+"%(lhs)s|%(rhs)s" % self.data
+    def __len__(self):
+        return 1
+
 class RegexBuilder:
     def __init__(self):
         self.text = ""
@@ -131,6 +141,10 @@ class RegexBuilder:
         self.__insert_node(InvertedRangeNode(range))
         return self
 
+    def alternate(self, lhs, rhs):
+        self.__insert_node(OrNode({'lhs':lhs, 'rhs':rhs}))
+        return self
+
     def to_string(self):
         """ DEPRECATED: use str(regex) instead """
         return str(self)
@@ -168,3 +182,7 @@ def range(lit):
 def inverted_range(lit):
     """ Matches any characters NOT in the range """
     return RegexBuilder().inverted_range(lit)
+
+def alternate(lhs, rhs):
+    """ Matches either the lhs OR the rhs expressions """
+    return RegexBuilder().alternate(lhs, rhs)
