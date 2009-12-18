@@ -51,6 +51,14 @@ class ZeroOrMoreNode(Node):
     def __len__(self):
         return len(self.data)
 
+class OptionalNode(Node):
+    def __str__(self):
+        if len(self.data) > 1:
+            self.data = group(self.data, non_capture=True)
+        return Node.__str__(self)+"%s?" % str(self.data)
+    def __len__(self):
+        return len(self.data)
+
 class GroupNode(Node):
     def __str__(self):
         if self.data['lazy']:
@@ -131,6 +139,11 @@ class RegexBuilder:
         self.__insert_node(ZeroOrMoreNode(regex))
         return self
     
+    def optional(self, regex):
+        """ Makes the passed expression optional """
+        self.__insert_node(OptionalNode(regex))
+        return self
+    
     def range(self, range):
         """ Matches any characters in the range """
         self.__insert_node(RangeNode(range))
@@ -174,6 +187,10 @@ def one_or_more(regex):
 def zero_or_more(regex):
     """ Repeats the passed expression zero or more times """
     return RegexBuilder().zero_or_more(regex)
+
+def optional(regex):
+    """ The passed expression is optional """
+    return RegexBuilder().optional(regex)
 
 def range(lit):
     """ Matches any characters in the range """

@@ -39,6 +39,10 @@ class BuilderTests(unittest.TestCase):
         self.assertEquals('a|(?:bc)', RegexBuilder().alternate(literal('a'), literal('bc')).to_string())
         self.assertEquals('(?:ab)|(?:cd)', RegexBuilder().alternate(literal('ab'), literal('cd')).to_string())
 
+    def test_optional(self):
+        self.assertEquals('a?', RegexBuilder().optional(literal('a')).to_string())
+        self.assertEquals('(?:ab)?', RegexBuilder().optional(literal('ab')).to_string())
+
     def test_module_functions(self):
         self.assertEquals('ab(c{3,7})d', literal('ab').group(repeats(literal('c'), 3, 7)).literal('d').to_string())
 
@@ -70,6 +74,11 @@ class StringAndLenTests(unittest.TestCase):
         regex = zero_or_more(literal('a'))
         self.assertEquals(1, len(regex))
         self.assertEquals('a*', str(regex))
+
+    def test_optional(self):
+        regex = optional(literal('a'))
+        self.assertEquals(1, len(regex))
+        self.assertEquals('a?', str(regex))
 
     def test_group(self):
         regex = group(literal('a'))
