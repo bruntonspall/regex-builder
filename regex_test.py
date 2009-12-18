@@ -38,6 +38,11 @@ class BuilderTests(unittest.TestCase):
         self.assertEquals('(?:ab)|b', RegexBuilder().alternate(literal('ab'), literal('b')).to_string())
         self.assertEquals('a|(?:bc)', RegexBuilder().alternate(literal('a'), literal('bc')).to_string())
         self.assertEquals('(?:ab)|(?:cd)', RegexBuilder().alternate(literal('ab'), literal('cd')).to_string())
+        self.assertEquals('a|bc', RegexBuilder().alternate(literal('a'), literal('b')).literal('c').to_string())
+        self.assertEquals('(?:ab)|(?:cd)e', RegexBuilder().alternate(literal('ab'), literal('cd')).literal('e').to_string())
+        self.assertEquals('ab|c', RegexBuilder().literal('a').alternate(literal('b'), literal('c')).to_string())
+        self.assertEquals('(?:ab)|c', RegexBuilder().alternate(literal('ab'), literal('c')).to_string())
+        self.assertEquals('a(?:b)|d+', RegexBuilder().one_or_more(alternate(literal('a').group('b', non_capture=True), literal('d'))).to_string())
 
     def test_optional(self):
         self.assertEquals('a?', RegexBuilder().optional(literal('a')).to_string())
@@ -120,6 +125,19 @@ class ComplexTests(unittest.TestCase):
         self.assertEquals('(?:bc){2,3}', repeats(literal('bc'), 2, 3).to_string())
     def test_one_or_more_single_character_literals(self):
         self.assertEquals(r'a\d+d', literal('a').one_or_more(literal(r'\d')).literal('d').to_string())
+    def test_or_literal(self):
+        regex = alternate(literal('a'),literal('b')).literal('c')
+        self.assertEqual('a|bc', str(regex))
+        self.assertNotEquals(None, re.match(str(regex), "ac"))
+        self.assertNotEquals(None, re.match(str(regex), "bc"))
+        regex = one_or_more(alternate(literal('a').group('b', non_capture=True), literal('d')))
+        self.assertNotEquals(None, re.match(str(regex), "ab"))
+        self.assertNotEquals(None, re.match(str(regex), "d"))
+        self.assertEquals(None, re.match(str(regex), "ad"))
+        self.assertNotEquals(None, re.match(str(regex), "abab"))
+        self.assertNotEquals(None, re.match(str(regex), "dd"))
+        self.assertNotEquals(None, re.match(str(regex), "dab"))
+
     def test_html_tag_parser(self):
         """ www.regular-expressions.info/examples.html - says this <TAG\b[^>]*>(.*?)</TAG> will match html tag TAG """
         regex = literal(r'<TAG\b').zero_or_more(

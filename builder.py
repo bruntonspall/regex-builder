@@ -95,7 +95,7 @@ class OrNode(Node):
             self.data['rhs'] = group(self.data['rhs'], non_capture=True)
         return Node.__str__(self)+"%(lhs)s|%(rhs)s" % self.data
     def __len__(self):
-        return 1
+        return max(len(self.data['lhs']), len(self.data['rhs']))
 
 class RegexBuilder:
     def __init__(self):
