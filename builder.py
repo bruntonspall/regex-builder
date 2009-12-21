@@ -24,7 +24,7 @@ class RepeatsMinMaxNode(Node):
             self.data['regex'] = group(regex, non_capture=True)
         return Node.__str__(self)+"%(regex)s{%(min)d,%(max)d}" % self.data
     def __len__(self):
-        return len(self.data['regex'])
+        return len(self.data['regex'])+1
 
 class RepeatsNumNode(Node):
     def __str__(self):
@@ -33,7 +33,7 @@ class RepeatsNumNode(Node):
             self.data['regex'] = group(regex, non_capture=True)
         return Node.__str__(self)+"%(regex)s{%(num)d}" % self.data
     def __len__(self):
-        return len(self.data['regex'])
+        return len(self.data['regex'])+1
 
 class OneOrMoreNode(Node):
     def __str__(self):
@@ -41,7 +41,7 @@ class OneOrMoreNode(Node):
             self.data = group(self.data, non_capture=True)
         return Node.__str__(self)+"%s+" % str(self.data)
     def __len__(self):
-        return len(self.data)
+        return len(self.data)+1
 
 class ZeroOrMoreNode(Node):
     def __str__(self):
@@ -49,7 +49,7 @@ class ZeroOrMoreNode(Node):
             self.data = group(self.data, non_capture=True)
         return Node.__str__(self)+"%s*" % str(self.data)
     def __len__(self):
-        return len(self.data)
+        return len(self.data)+1
 
 class OptionalNode(Node):
     def __str__(self):
@@ -57,7 +57,7 @@ class OptionalNode(Node):
             self.data = group(self.data, non_capture=True)
         return Node.__str__(self)+"%s?" % str(self.data)
     def __len__(self):
-        return len(self.data)
+        return len(self.data)+1
 
 class GroupNode(Node):
     def __str__(self):
@@ -79,13 +79,13 @@ class RangeNode(Node):
     def __str__(self):
         return Node.__str__(self)+"[%s]" % str(self.data)
     def __len__(self):
-        return 1
+        return Node.__len__(self)+1
 
 class InvertedRangeNode(Node):
     def __str__(self):
         return Node.__str__(self)+"[^%s]" % str(self.data)
     def __len__(self):
-        return 1
+        return Node.__len__(self)+1
 
 class OrNode(Node):
     def __str__(self):
