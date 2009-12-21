@@ -64,25 +64,25 @@ class StringAndLenTests(unittest.TestCase):
     
     def test_repeats(self):
         regex = repeats(literal('a'),1)
-        self.assertEquals(1, len(regex))
+        self.assertEquals(2, len(regex))
         self.assertEquals('a{1}', str(regex))
         regex = repeats(literal('a'),1,3)
-        self.assertEquals(1, len(regex))
+        self.assertEquals(2, len(regex))
         self.assertEquals('a{1,3}', str(regex))
 
     def test_one_or_more(self):
         regex = one_or_more(literal('a'))
-        self.assertEquals(1, len(regex))
+        self.assertEquals(2, len(regex))
         self.assertEquals('a+', str(regex))
 
     def test_zero_or_more(self):
         regex = zero_or_more(literal('a'))
-        self.assertEquals(1, len(regex))
+        self.assertEquals(2, len(regex))
         self.assertEquals('a*', str(regex))
 
     def test_optional(self):
         regex = optional(literal('a'))
-        self.assertEquals(1, len(regex))
+        self.assertEquals(2, len(regex))
         self.assertEquals('a?', str(regex))
 
     def test_group(self):
@@ -172,3 +172,10 @@ class RealLifeTests(unittest.TestCase):
         self.assertNotEqual(None, re.match(regex, "/travel/france"))
         self.assertNotEqual(None, re.match(regex, "/travel/france+skiing"))
         self.assertNotEqual(None, re.match(regex, "/travel/france+science/nanotechnology"))
+
+class BugReportTests(unittest.TestCase):
+    def test_bug_4_grouping_range(self):
+        regex = one_or_more(literal('abc').range('a-z'))
+        self.assertEquals("(?:abc[a-z])+", str(regex))
+        regex = one_or_more(one_or_more(literal('a')))
+        self.assertEquals("(?:a+)+", str(regex))
