@@ -48,6 +48,26 @@ class BuilderTests(unittest.TestCase):
         self.assertEquals('a?', RegexBuilder().optional(literal('a')).to_string())
         self.assertEquals('(?:ab)?', RegexBuilder().optional(literal('ab')).to_string())
 
+    def test_immutible_objects(self):
+        """ An object once built is immutible, any methods called on it do not change it """
+        ab = RegexBuilder().literal('ab')
+        self.assertEquals('abc', str(ab.literal('c')))
+        self.assertEquals('abd+', str(ab.one_or_more('d')))
+        self.assertEquals('abe*', str(ab.zero_or_more('e')))
+        self.assertEquals('ab(f)', str(ab.group('f')))
+        self.assertEquals('abg|h', str(ab.alternate('g', 'h')))
+        self.assertEquals('abi{2}', str(ab.repeats('i', 2)))
+        self.assertEquals('ab[j]', str(ab.range('j')))
+        self.assertEquals('ab[^k]', str(ab.inverted_range('k')))
+        self.assertEquals('ab', str(ab))
+
+    def test_append(self):
+        """ Append allows you to append a regex, and should explicitely allow you add yourself without error """
+        ab = RegexBuilder().literal('ab')
+        self.assertEquals('abab', str(ab.append(ab)))
+        self.assertEquals('abcd', str(RegexBuilder().literal('ab').append('cd')))
+        self.assertEquals('ab(?:cd)+', str(RegexBuilder().literal('ab').append(RegexBuilder().one_or_more(literal('cd')))))
+
     def test_module_functions(self):
         self.assertEquals('ab(c{3,7})d', literal('ab').group(repeats(literal('c'), 3, 7)).literal('d').to_string())
 
