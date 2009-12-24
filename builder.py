@@ -105,73 +105,55 @@ class RegexBuilder:
         self.root = Node()
         self.tail = self.root
 
-    def __insert_node(self, node):
-        node.next = self.root
-        self.root = node
+    def __add_node(self, node):
+        obj = copy.deepcopy(self)
+        node.next = obj.root
+        obj.root = node
+        return obj
 
     def literal(self, lit):
         """ Adds a text literal to the regular expression """
-        obj = copy.deepcopy(self)
-        obj.__insert_node(LiteralNode(lit))
-        return obj
+        return self.__add_node(LiteralNode(lit))
 
     def repeats(self, regex, min, max=None):
         """ Repeats the passed expression n times """
-        obj = copy.deepcopy(self)
         if max:
-            obj.__insert_node(RepeatsMinMaxNode({'min':min, 'max':max, 'regex': regex}))
+            return self.__add_node(RepeatsMinMaxNode({'min':min, 'max':max, 'regex': regex}))
         else:
-            obj.__insert_node(RepeatsNumNode({'num':min, 'regex': regex}))
-        return obj
+            return self.__add_node(RepeatsNumNode({'num':min, 'regex': regex}))
     
     def group(self, regex, non_capture=False, lazy=False):
         """ Groups the passed regex with a backlink """
-        obj = copy.deepcopy(self)
         if non_capture:
-            obj.__insert_node(NonCaptureGroupNode({'regex': regex, 'lazy': lazy}))
+            return self.__add_node(NonCaptureGroupNode({'regex': regex, 'lazy': lazy}))
         else:
-            obj.__insert_node(GroupNode({'regex': regex, 'lazy': lazy}))
-        return obj
+            return self.__add_node(GroupNode({'regex': regex, 'lazy': lazy}))
 
     def one_or_more(self, regex):
         """ Repeats the passed expression one or more times """
-        obj = copy.deepcopy(self)
-        obj.__insert_node(OneOrMoreNode(regex))
-        return obj
+        return self.__add_node(OneOrMoreNode(regex))
 
     def zero_or_more(self, regex):
         """ Repeats the passed expression zero or more times """
-        obj = copy.deepcopy(self)
-        obj.__insert_node(ZeroOrMoreNode(regex))
-        return obj
+        return self.__add_node(ZeroOrMoreNode(regex))
     
     def optional(self, regex):
         """ Makes the passed expression optional """
-        obj = copy.deepcopy(self)
-        obj.__insert_node(OptionalNode(regex))
-        return obj
+        return self.__add_node(OptionalNode(regex))
     
     def range(self, range):
         """ Matches any characters in the range """
-        obj = copy.deepcopy(self)
-        obj.__insert_node(RangeNode(range))
-        return obj
+        return self.__add_node(RangeNode(range))
 
     def inverted_range(self, range):
         """ Matches any characters in the range """
-        obj = copy.deepcopy(self)
-        obj.__insert_node(InvertedRangeNode(range))
-        return obj
+        return self.__add_node(InvertedRangeNode(range))
 
     def alternate(self, lhs, rhs):
-        obj = copy.deepcopy(self)
-        obj.__insert_node(OrNode({'lhs':lhs, 'rhs':rhs}))
-        return obj
+        return self.__add_node(OrNode({'lhs':lhs, 'rhs':rhs}))
 
     def append(self, regex):
-        obj = copy.deepcopy(self)
-        obj.__insert_node(copy.deepcopy(LiteralNode(regex)))
-        return obj
+        return self.__add_node(copy.deepcopy(LiteralNode(regex)))
 
     def to_string(self):
         """ DEPRECATED: use str(regex) instead """
