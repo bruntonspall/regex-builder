@@ -1,4 +1,6 @@
 import copy
+import re
+
 class Node:
     def __init__(self, data=None):
         self.data = data
@@ -112,7 +114,11 @@ class RegexBuilder:
         return obj
 
     def literal(self, lit):
-        """ Adds a text literal to the regular expression """
+        """ Adds a text literal to the regular expression. This escapes the literal """
+        return self.__add_node(LiteralNode(re.escape(lit)))
+
+    def raw(self, lit):
+        """ Adds a text literal to the regular expression. This does not escape the literal """
         return self.__add_node(LiteralNode(lit))
 
     def repeats(self, regex, min, max=None):
@@ -155,6 +161,9 @@ class RegexBuilder:
     def append(self, regex):
         return self.__add_node(copy.deepcopy(LiteralNode(regex)))
 
+    def class_(self, classtype):
+        return self.__add_node(copy.deepcopy(LiteralNode('\\'+classtype)))
+        
     def to_string(self):
         """ DEPRECATED: use str(regex) instead """
         return str(self)
@@ -168,6 +177,14 @@ class RegexBuilder:
 def literal(lit):
     """ Adds a text literal to the regular expression """
     return RegexBuilder().literal(lit)
+
+def raw(lit):
+    """ Adds a text literal to the regular expression """
+    return RegexBuilder().raw(lit)
+
+def class_(lit):
+    """ Adds a text literal to the regular expression """
+    return RegexBuilder().class_(lit)
 
 def repeats(regex, min=None, max=None):
     """ Repeats the passed expression n times """

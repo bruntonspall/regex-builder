@@ -9,6 +9,12 @@ class BuilderTests(unittest.TestCase):
     def test_chaining_literals(self):
         self.assertEquals('abc', RegexBuilder().literal('ab').literal('c').to_string())
     
+    def test_escaping_literals(self):
+        self.assertEquals('\.', RegexBuilder().literal('.').to_string())
+    
+    def test_raw(self):
+        self.assertEquals('.', RegexBuilder().raw('.').to_string())
+    
     def test_repetition(self):
         self.assertEquals('a{2}', RegexBuilder().repeats(RegexBuilder().literal('a'), 2).to_string())
     
@@ -32,6 +38,9 @@ class BuilderTests(unittest.TestCase):
     
     def test_character_inverted_range(self):
         self.assertEquals('[^abc]', RegexBuilder().inverted_range('abc').to_string())
+
+    def test_class(self):
+        self.assertEquals('\d', RegexBuilder().class_('d').to_string())
     
     def test_or(self):
         self.assertEquals('a|b', RegexBuilder().alternate(literal('a'), literal('b')).to_string())
@@ -144,7 +153,7 @@ class ComplexTests(unittest.TestCase):
     def test_repetition_of_multiword_literals(self):
         self.assertEquals('(?:bc){2,3}', repeats(literal('bc'), 2, 3).to_string())
     def test_one_or_more_single_character_literals(self):
-        self.assertEquals(r'a\d+d', literal('a').one_or_more(literal(r'\d')).literal('d').to_string())
+        self.assertEquals(r'ac+d', literal('a').one_or_more(literal(r'c')).literal('d').to_string())
     def test_or_literal(self):
         regex = alternate(literal('a'),literal('b')).literal('c')
         self.assertEqual('a|bc', str(regex))
@@ -160,35 +169,34 @@ class ComplexTests(unittest.TestCase):
 
     def test_html_tag_parser(self):
         """ www.regular-expressions.info/examples.html - says this <TAG\b[^>]*>(.*?)</TAG> will match html tag TAG """
-        regex = literal(r'<TAG\b').zero_or_more(
+        regex = literal(r'<TAG').class_('b').zero_or_more(
                         inverted_range('>')
                     ).literal('>').group(
                         zero_or_more(
-                            literal('.')), lazy=True
+                            raw('.')), lazy=True
                     ).literal('</TAG>')
         self.assertEquals(
-            r'<TAG\b[^>]*>(.*?)</TAG>', regex.to_string())
+            r'\<TAG\b[^>]*\>(.*?)\<\/TAG\>', regex.to_string())
     def test_simple_ip_address(self):
         """ www.regular-expressions.info/examples.html - says this \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} will match tags """
         self.assertEquals(
             r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', 
-            repeats(literal(r'\d'), 1, 3)
-            .literal(r'\.')
-            .repeats(literal(r'\d'), 1, 3)
-            .literal(r'\.')
-            .repeats(literal(r'\d'), 1, 3)
-            .literal(r'\.')
-            .repeats(literal(r'\d'), 1, 3)
+            repeats(class_('d'), 1, 3)
+            .literal(r'.')
+            .repeats(class_('d'), 1, 3)
+            .literal(r'.')
+            .repeats(class_('d'), 1, 3)
+            .literal(r'.')
+            .repeats(class_('d'), 1, 3)
             .to_string())
 
 class RealLifeTests(unittest.TestCase):
     def test_section_keyword_urls(self):
         """ We want to match /travel/france, /travel/france+skiing, /travel/france+science/nanotechnology """
         slugword = one_or_more(range('a-zA-Z0-9'))
-        section_keyword = literal(str(slugword)+'/'+str(slugword))
-        combiner = literal('/'+str(section_keyword)).optional(literal('\\+').alternate(section_keyword, slugword))
+        section_keyword = slugword.literal('/').append(slugword)
+        combiner = literal('/').append(section_keyword).optional(literal('+').alternate(section_keyword, slugword))
         regex = str(combiner)
-        print regex
         self.assertNotEqual(None, re.match(regex, "/travel/france"))
         self.assertNotEqual(None, re.match(regex, "/travel/france+skiing"))
         self.assertNotEqual(None, re.match(regex, "/travel/france+science/nanotechnology"))
